@@ -10,13 +10,13 @@ function panelGpGSM()
 	ID_LBL_ATOK			= 1009
     ID_BUTTON_Status	= 1011
 	ID_LBL_STOK			= 1012
-
+	
 	ID_PN_OPSOS			= 1100
 
 	ID_BUTTON_OpSIM		= 1101
 	ID_BUTTON_Operator	= 1112
     ID_BUTTON_Operators	= 1113
-
+    
 
 	ID_BUTTON_Signal	= 1015
 
@@ -35,10 +35,10 @@ function panelGpGSM()
 
 	ID_PN_OTHERS		= 1300
     ID_BUTTON_IMEI		= 1301
-
+	
 	btnSize = wx.wxSize( 60, 30)
 	chSize	= wx.wxSize(  6, 10)
-
+	
 -- -----------
     btnTest = wx.wxButton( panelGP, ID_BUTTON_Test, "get config",
                           wx.wxPoint( 00, 20), wx.wxSize( 80, 30) )
@@ -52,19 +52,19 @@ function panelGpGSM()
                             {"minimal", "normal", "flight"}, 3, -- 0.796, 1.02, 0.892 mA
                             wx.wxSUNKEN_BORDER)
 	rgFUNC:SetSelection(1)
-
-
+							
+	
 -- -----
 	pnOTHERS = wx.wxStaticBox(panelGP, ID_PN_OTHERS, "others", wx.wxPoint( 00, 330), wx.wxSize( 210, 50) )
 
 	tbCONSOLE = wx.wxTextCtrl( panelGP, ID_TBOX_CONSOLE, "+\n", wx.wxPoint(220, 20), wx.wxSize(240, 280), wx.wxTE_MULTILINE ) -- +wx.wxNO_BORDER
--- ---------
+-- ---------	
     notebook:AddPage(panelGP, "general commands")
 
 end -- panelGpGSM
 
 
-function strToHost( msg )
+function strToHost( msg )      
 	for i = 1, string.len(msg) do
 		sendCOM_HOST( string.sub( msg, i, i) )
 	end -- for i
@@ -103,18 +103,8 @@ function OnGETCFG(event)
 	if ( string.char( 0xC1) == rpl0 ) then
 		lblATOK:SetLabel("ok")
 		lblATOK:SetBackgroundColour(wx.wxColour(0, 255, 0))
-		local REG0  = string.byte( rREG0 ) + 0
-		local URate = math.floor(( REG0  / 32 )) -- bit 765
-		if ( 3 == URate ) then
-			tbCONSOLE:AppendText( "baude 9600" )
-		end
-		local UBit = math.floor(( REG0  / 8 )) -- bit 43
-		local UAir = REG0 - 8 * math.floor(( REG0  / 8 ) ) -- bit 210
-		if ( 2 == UAir ) then
-			tbCONSOLE:AppendText( "air 2.4k" )
-		end
-
-
+		local REG0  = string.byte( rREG0 )
+		local URate = ( REG0  )
 --		tbCONSOLE:AppendText( URate )
 
 	end
