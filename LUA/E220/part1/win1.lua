@@ -6,7 +6,7 @@
  local wx = require("wx")
 
     frame = wx.wxFrame( wx.NULL, wx.wxID_ANY, "Test LORA E220 modem"
-                                 , wx.wxDefaultPosition, wx.wxSize( 500, 470)
+                                 , wx.wxDefaultPosition, wx.wxSize( 500, 270)
                                  , wx.wxDEFAULT_FRAME_STYLE)
 
     frame:Show(true)

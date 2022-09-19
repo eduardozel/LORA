@@ -6,12 +6,16 @@
  rs232 = require( "luars232" )
 
  comHOST = "COM3"
+ pHOST = null
 
 function openCOM_HOST()
   e, pHOST = rs232.open(comHOST)
   if e ~= rs232.RS232_ERR_NOERROR then
-    wx.wxMessageBox(string.format("can't open serial port '%s', error: '%s'\n",
-			port_name, rs232.error_tostring(e)),  "COM PORT Error", wx.wxOK + wx.wxICON_INFORMATION, frame)
+--    out:write( "port not open \n")
+--    wx.wxMessageBox("can't open serial port '%s', error: \n", wx.wxOK + wx.wxICON_INFORMATION, frame)
+
+--    wx.wxMessageBox(string.format("can't open serial port '%s', error: '%s'\n",
+--			port_name, rs232.error_tostring(e)),  "COM PORT Error", wx.wxOK + wx.wxICON_INFORMATION, frame)
     return
   end -- if
 
