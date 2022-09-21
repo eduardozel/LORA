@@ -23,10 +23,14 @@ function panelGpGSM()
     ID_CBOX_UARTparity	= 2104
 
 	ID_PN_TxPower		= 2200
-    ID_CBOX_TxPower		= 2210
-	ID_RG_EMODE			= 2212
+	ID_RG_TxPower		= 2210
+    ID_LBL_TxPower		= 2212
+    ID_BTN_TxPower		= 2214
 
 
+    ID_PN_CHAN			= 2300
+    ID_SPN_CHAN			= 2310
+    ID_LBL_CHAN			= 2312
 
 
 	cbFont = wx.wxFont(  12, wx.wxFONTFAMILY_MODERN, wx.wxFONTSTYLE_NORMAL, wx.wxFONTWEIGHT_NORMAL, false, "")
@@ -34,7 +38,7 @@ function panelGpGSM()
 	btnSize = wx.wxSize( 60, 30)
 	chSize	= wx.wxSize(  6, 10)
 
-	tbCONSOLE = wx.wxTextCtrl( panelGP, ID_TBOX_CONSOLE, "+\n", wx.wxPoint(220, 20), wx.wxSize(240, 280), wx.wxTE_MULTILINE ) -- +wx.wxNO_BORDER
+	tbCONSOLE = wx.wxTextCtrl( panelGP, ID_TBOX_CONSOLE, "+\n", wx.wxPoint(280, 20), wx.wxSize(240, 180), wx.wxTE_MULTILINE ) -- +wx.wxNO_BORDER
 
 
 -- -----------
@@ -47,8 +51,8 @@ function panelGpGSM()
 
 	pnUART = wx.wxStaticBox( panelGP, ID_PN_UART, "uart", wx.wxPoint( 10, 50), wx.wxSize( 180, 100) )	
 
-    cbUARTrate    = wx.wxComboBox( pnUART, ID_CBOX_UARTrate,    "chose uart rate", wx.wxPoint( 10, 15), wx.wxSize( 130, 20), {})--, wx.wxTE_PROCESS_ENTER )
-    cbUARTparity = wx.wxComboBox( pnUART, ID_CBOX_UARTparity, "chose uart parity", wx.wxPoint( 10, 55), wx.wxSize( 130, 20), {})--, wx.wxTE_PROCESS_ENTER )
+    cbUARTrate    = wx.wxComboBox( pnUART, ID_CBOX_UARTrate,    "rate", wx.wxPoint( 10, 15), wx.wxSize( 130, 20), {})--, wx.wxTE_PROCESS_ENTER )
+    cbUARTparity = wx.wxComboBox( pnUART, ID_CBOX_UARTparity, "parity", wx.wxPoint( 10, 55), wx.wxSize( 130, 20), {})--, wx.wxTE_PROCESS_ENTER )
 
 --	cbUARTrate:SetFont( wxFont(12, wxSWISS, wxNORMAL,wxNORMAL, false, wxT("Tahoma")) );
 --	cbUARTrate:SetFont( wxFont(12, wxSWISS, wxNORMAL,wxNORMAL, false) );
@@ -74,15 +78,35 @@ function panelGpGSM()
 	cbUARTparity:Append("8E1")
 	cbUARTparity:Append("8N1")
 -- --
-	pnTxPower = wx.wxStaticBox( panelGP, ID_PN_TxPower, "tx power", wx.wxPoint( 10, 150), wx.wxSize( 180, 100) )	
-	rgTxPower	= wx.wxRadioBox( pnTxPower, ID_RG_EMODE, "dBm", wx.wxPoint( 10, 15), wx.wxSize(  160, 40),
+	pnTxPower	= wx.wxStaticBox( panelGP, ID_PN_TxPower, "tx power", wx.wxPoint( 10, 150), wx.wxSize( 380, 100) )	
+	lblTxPower	= wx.wxStaticText( pnTxPower, ID_LBL_TxPower, "tx mWt", wx.wxPoint( 10, 65), wx.wxSize( 250, 16 ) )
+	rgTxPower	= wx.wxRadioBox( pnTxPower, ID_RG_TxPower, "dBm", wx.wxPoint( 10, 15), wx.wxSize(  360, 40),
                             {"22", "17", "13", "10"}, 4,
                             wx.wxSUNKEN_BORDER)
-	rgTxPower:SetSelection(0)
+    frame:Connect( ID_RG_TxPower, wx.wxEVT_COMMAND_RADIOBOX_SELECTED, OnSelectTxPower)
+	rgTxPower:SetSelection( 1 )
+    OnSelectTxPower(wx.wxEVT_COMMAND_RADIOBOX_SELECTED)
+	lblTxPower:SetFont( cbFont )
+
+    btnTxPower = wx.wxButton( pnTxPower, ID_BTN_TxPower, "save", wx.wxPoint( 180, 60), wx.wxSize( 80, 30) )
+    frame:Connect( ID_BTN_TxPower, wx.wxEVT_COMMAND_BUTTON_CLICKED, OnClickTxPower)
+	btnTxPower:Enable(false)
+
+
 --	rgTxPower:SetFont( cbFont )
+--	rgTxPower:Add("8N1")
+--    rgTxPower.rb5 = wx.RadioButton( pnTxPower, 33, label = 'Value C',pos = (10,70))
+-- local  x  =   os.clock ()
+-- -----------
+	pnCHAN	= wx.wxStaticBox( panelGP, ID_PN_CHAN, "Channel Control", wx.wxPoint( 10, 250), wx.wxSize( 380, 60) )	
+    spnCHAN = wx.wxSpinCtrl( pnCHAN, ID_SPN_CHAN, "chan", wx.wxPoint( 15, 20), wx.wxSize( 50, 26))
+    spnCHAN:SetRange ( 1, 20 )
+	spnCHAN:SetFont( cbFont )
+    frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_LINEDOWN, OnSpinChan)
+    frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_LINEUP,   OnSpinChan)
 
-
-
+	lblCHAN = wx.wxStaticText( pnCHAN, ID_LBL_CHAN, "frequency", wx.wxPoint( 70, 20 ), wx.wxSize( 150, 16))
+	lblCHAN:SetFont( cbFont )
 -- ---------
     
 	notebook:AddPage(panelGP, "E220 configuration")
@@ -108,6 +132,29 @@ function getRply(
 
 	return rply
 end -- getRply
+-- ---------
+function OnSpinChan(event)
+	local ch = spnCHAN:GetValue()
+	local fr = 850.125 + ch
+--	lblCHAN:SetLabel( string.format ( "= ".."%f", fr.." mHz"))
+	lblCHAN:SetLabel( "= "..fr.." mHz")
+end -- OnSpinChan
+
+
+--
+function OnSelectTxPower(event)
+	local sl = rgTxPower:GetSelection()
+	if     ( 0 == sl) then pwr = '158' -- 22
+	elseif ( 1 == sl) then pwr =  '50' -- 17
+	elseif ( 2 == sl) then pwr =  '20' -- 13
+	elseif ( 3 == sl) then pwr =  '10' -- 10
+	end
+	lblTxPower:SetLabel("power = "..pwr..' mWt')
+end -- OnSelectTxPower(event)
+
+function OnClickTxPower(event)
+end -- OnClickTxPower
+
 
 -- Handle the button event
 
@@ -153,6 +200,7 @@ function OnGETCFG(event)
 
 			local txpw = REG1 - ( math.floor(( REG1  / 4 )  )  * 4  ) -- bits 10 Transmitting Power
 			rgTxPower:SetSelection( txpw )
+			OnSelectTxPower(wx.wxEVT_COMMAND_RADIOBOX_SELECTED)
 
 
 --			REG2	-------------------------
@@ -165,6 +213,9 @@ function OnGETCFG(event)
 			tbCONSOLE:AppendText( string.format ( "%d", ch).."\n")
 			tbCONSOLE:AppendText( "\n")
 
+			spnCHAN:SetValue( REG2 )
+
+			btnTxPower:Enable(true)
 
 
 		end
