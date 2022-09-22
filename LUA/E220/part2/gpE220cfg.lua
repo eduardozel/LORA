@@ -31,6 +31,7 @@ function panelGpGSM()
     ID_PN_CHAN			= 2300
     ID_SPN_CHAN			= 2310
     ID_LBL_CHAN			= 2312
+    ID_LBL_FHELP		= 2314
 
 
 	cbFont = wx.wxFont(  12, wx.wxFONTFAMILY_MODERN, wx.wxFONTSTYLE_NORMAL, wx.wxFONTWEIGHT_NORMAL, false, "")
@@ -98,7 +99,7 @@ function panelGpGSM()
 --    rgTxPower.rb5 = wx.RadioButton( pnTxPower, 33, label = 'Value C',pos = (10,70))
 -- local  x  =   os.clock ()
 -- -----------
-	pnCHAN	= wx.wxStaticBox( panelGP, ID_PN_CHAN, "Channel Control", wx.wxPoint( 10, 250), wx.wxSize( 380, 60) )	
+	pnCHAN	= wx.wxStaticBox( panelGP, ID_PN_CHAN, "Channel Control", wx.wxPoint( 10, 250), wx.wxSize( 380, 90) )	
     spnCHAN = wx.wxSpinCtrl( pnCHAN, ID_SPN_CHAN, "chan", wx.wxPoint( 15, 20), wx.wxSize( 50, 26))
     spnCHAN:SetRange ( 1, 20 )
 	spnCHAN:SetFont( cbFont )
@@ -107,12 +108,20 @@ function panelGpGSM()
 
 	lblCHAN = wx.wxStaticText( pnCHAN, ID_LBL_CHAN, "frequency", wx.wxPoint( 70, 20 ), wx.wxSize( 150, 16))
 	lblCHAN:SetFont( cbFont )
+	lblFHELP = wx.wxStaticText( pnCHAN, ID_LBL_FHELP, "864 - 865; 868.7 - 869.2; < 25 mWt", wx.wxPoint( 15, 60 ), wx.wxSize( 150, 16))
+	lblFHELP:SetFont( cbFont )
+
+
+--
+-- https://58.rkn.gov.ru/directions/p2231/p9827/p20503/
+-- 22. Неспециализированные (любого назначения) устройства в полосах радиочастот:
+-- 864 - 865 MHz, 868.7 - 869.2 MHz; < 25 mWt
 -- ---------
     
 	notebook:AddPage(panelGP, "E220 configuration")
 end -- panelGpGSM
 
-
+ 
 function strToHost( msg )
 	for i = 1, string.len(msg) do
 		sendCOM_HOST( string.sub( msg, i, i) )
@@ -132,14 +141,22 @@ function getRply(
 
 	return rply
 end -- getRply
+
 -- ---------
 function OnSpinChan(event)
 	local ch = spnCHAN:GetValue()
 	local fr = 850.125 + ch
---	lblCHAN:SetLabel( string.format ( "= ".."%f", fr.." mHz"))
+
+	local chkFr = ( ( fr >= 864 )  and ( fr <= 865) ) or ( ( fr >= 868.7 ) and ( fr <= 869.2) )
+	if ( chkFr ) then
+		lblFHELP:SetBackgroundColour( wx.wxColour( 0, 255, 0))
+		lblFHELP:SetLabel( "")
+    else
+		lblFHELP:SetBackgroundColour( wx.wxColour( 255, 0, 0))
+		lblFHELP:SetLabel( "864 - 865; 868.7 - 869.2; <25 mWt")
+	end
 	lblCHAN:SetLabel( "= "..fr.." mHz")
 end -- OnSpinChan
-
 
 --
 function OnSelectTxPower(event)
