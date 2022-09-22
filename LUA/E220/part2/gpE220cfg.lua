@@ -32,6 +32,7 @@ function panelGpGSM()
     ID_SPN_CHAN			= 2310
     ID_LBL_CHAN			= 2312
     ID_LBL_FHELP		= 2314
+    ID_BTN_CHAN			= 2216
 
 
 	cbFont = wx.wxFont(  12, wx.wxFONTFAMILY_MODERN, wx.wxFONTSTYLE_NORMAL, wx.wxFONTWEIGHT_NORMAL, false, "")
@@ -103,13 +104,20 @@ function panelGpGSM()
     spnCHAN = wx.wxSpinCtrl( pnCHAN, ID_SPN_CHAN, "chan", wx.wxPoint( 15, 20), wx.wxSize( 50, 26))
     spnCHAN:SetRange ( 1, 20 )
 	spnCHAN:SetFont( cbFont )
-    frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_LINEDOWN, OnSpinChan)
+	
+--	frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_THUMBRELEASE, OnSpinChan)
     frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_LINEUP,   OnSpinChan)
+    frame:Connect( ID_SPN_CHAN, wx.wxEVT_SCROLL_LINEDOWN, OnSpinChan)
 
 	lblCHAN = wx.wxStaticText( pnCHAN, ID_LBL_CHAN, "frequency", wx.wxPoint( 70, 20 ), wx.wxSize( 150, 16))
 	lblCHAN:SetFont( cbFont )
 	lblFHELP = wx.wxStaticText( pnCHAN, ID_LBL_FHELP, "864 - 865; 868.7 - 869.2; < 25 mWt", wx.wxPoint( 15, 60 ), wx.wxSize( 150, 16))
 	lblFHELP:SetFont( cbFont )
+
+
+    btnChan = wx.wxButton( pnCHAN, ID_BTN_CHAN, "save", wx.wxPoint( 180, 20), wx.wxSize( 80, 30) )
+    frame:Connect( ID_BTN_CHAN, wx.wxEVT_COMMAND_BUTTON_CLICKED, OnClickChan)
+--	btnChan:Enable(false)
 
 
 --
@@ -143,22 +151,36 @@ function getRply(
 end -- getRply
 
 -- ---------
-function OnSpinChan(event)
-	local ch = spnCHAN:GetValue()
-	local fr = 850.125 + ch
+function setFreq( chan )
+	local fr = 850.125 + chan
 
 	local chkFr = ( ( fr >= 864 )  and ( fr <= 865) ) or ( ( fr >= 868.7 ) and ( fr <= 869.2) )
 	if ( chkFr ) then
 		lblFHELP:SetBackgroundColour( wx.wxColour( 0, 255, 0))
-		lblFHELP:SetLabel( "")
+		lblFHELP:SetLabel( "864 - 865; 868.7 - 869.2; <25 mWt")
     else
 		lblFHELP:SetBackgroundColour( wx.wxColour( 255, 0, 0))
 		lblFHELP:SetLabel( "864 - 865; 868.7 - 869.2; <25 mWt")
 	end
 	lblCHAN:SetLabel( "= "..fr.." mHz")
+end -- setFreq
+
+function OnSpinChan(event)
+	local ch = spnCHAN:GetValue()
+    local typ = event:GetEventType()
+    if ( typ == wx.wxEVT_SCROLL_LINEDOWN ) then
+		ch = ch - 1
+	elseif ( typ == wx.wxEVT_SCROLL_LINEUP ) then
+		ch = ch + 1
+	end -- if
+	setFreq(ch)
 end -- OnSpinChan
 
 --
+-- Handle the button event
+--
+-- $00$00$17Helllo, World!!!
+
 function OnSelectTxPower(event)
 	local sl = rgTxPower:GetSelection()
 	if     ( 0 == sl) then pwr = '158' -- 22
@@ -173,7 +195,24 @@ function OnClickTxPower(event)
 end -- OnClickTxPower
 
 
--- Handle the button event
+function OnClickChan(event)
+	local ch = spnCHAN:GetValue()
+--	lblCHAN:SetLabel( "chan "..ch)
+--	lblCHAN:SetLabel( "chan "..string.format ( "%x", (ch)))
+	openCOM_HOST()
+	sendCOM_HOST( string.char( 0xC0) )
+	sendCOM_HOST( string.char( 0x04) )
+	sendCOM_HOST( string.char( 0x01) )
+	sendCOM_HOST( string.char( ch ) )
+
+	local rpl0 = getRply()
+	local rpl1 = getRply()
+	local rpl2 = getRply()
+	local rREG2 = getRply()	-- Channel Control（CH）
+
+	closeCOM_HOST()
+end -- OnClickChan
+
 
 function OnGETCFG(event)
 	openCOM_HOST()
@@ -231,8 +270,8 @@ function OnGETCFG(event)
 			tbCONSOLE:AppendText( "\n")
 
 			spnCHAN:SetValue( REG2 )
-
-			btnTxPower:Enable(true)
+			setFreq( REG2 )
+--			btnTxPower:Enable(true)
 
 
 		end
