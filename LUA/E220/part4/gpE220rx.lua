@@ -86,12 +86,15 @@ function OnStartLog(event)
 			repeat
 				local err, stt,  size = pHOST:read( 1, 1000 )
 			until stt == STX
-			local err, msg,  size = pHOST:read( 8, 100 )
+			fCSV = io.open ("E220rx.csv", "a");
+			local err, msg,  size = pHOST:read( 8, 100 ) -- U0123;?;
+			local err, bCR,  size = pHOST:read( 1, 100 )
 			local err, ett,  size = pHOST:read( 1, 100 )
-			local err, et1,  size = pHOST:read( 1, 100 )
 			local err, rssi, size = pHOST:read( 1, 100 )
 			tm = os.date("%X")
 			tbLOG:AppendText( tm..";"..msg..string.byte(rssi)..";".."\n")
+			fCSV:write (tm..";"..msg..string.byte(rssi)..";".."\n")
+			fCSV:close ()
 		until false
 	else
 		tbLOG:AppendText( "no com port".."\n")
