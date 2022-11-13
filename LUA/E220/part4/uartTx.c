@@ -54,7 +54,7 @@ int main(void)
     sendByte('2');
     sendByte('3');
     sendByte(';');
-    sendByte(cnt+'0');
+    sendByte(cnt+'A');
     sendByte(';');
     sendByte(0x0D);
     sendByte(0x03);
