@@ -1,6 +1,7 @@
 -- LuaForWindows_v5.1.5-52
 
  require("gpE220cfg")
+ require("gpE220rx")
 
 
  local wx = require("wx")
@@ -15,6 +16,6 @@
                                    wx.wxDefaultPosition, wx.wxDefaultSize)
                                    --wx.wxNB_BOTTOM)
 
-    panelGpGSM()
-
+    panelRX()
+--    panelGpGSM()
 wx.wxGetApp():MainLoop()
